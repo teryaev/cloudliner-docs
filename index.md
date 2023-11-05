@@ -16,6 +16,7 @@
   - [How to configure custom domain for static website (Cloudfront)?](#how-to-configure-custom-domain-for-static-website-cloudfront)
   - [How to configure custom domain for web-service running on EC2?](#how-to-configure-custom-domain-for-web-service-running-on-ec2)
   - [Can Cloudliner create DNS records for me?](#can-cloudliner-create-dns-records-for-me)
+  - [How to configure /health endpoint?](#how-to-configure-health-endpoint)
 
 ## Introduction
 Cloudliner is a tool that manages your AWS infrastructure for you. Cloudliner bootstraps your infrastructure baseline configuration for you.
@@ -25,13 +26,15 @@ Cloudliner is a tool that manages your AWS infrastructure for you. Cloudliner bo
 Cloudliner would be useful for you if you don't want to spend hours and days learning AWS to get things working. Cloudliner takes minutes creating a production-ready environment that is built following infrastructure and security best-practices. Even if you are an experienced engineer, Cloudliner would save you some time bootstrapping the baseline configuration for you.
 
 
-## How to connect AWS account to Cloudliner
+## How expensive are Cloudliner created resources?
+By default, Cloudliner only creates resources that are within AWS free tier. If you have a new AWS account, your infrastructure would cost you nothing as long as you create no other resources. Most of free-tier resources are available for 12 months for free. You can get more details about free-tier conditions for each resource type by corresponding link on Cloudliner dashboard.
 
+
+## How to connect AWS account to Cloudliner
 In order to start with Cloudliner you need to have an AWS account. Cloudliner uses an IAM role in order to access and configure your AWS account. You need to create an IAM role in your AWS account and allow Cloudliner to assume it. When you create an account in Cloudliner, there's a link in the dialog that leads you to AWS console 'Create IAM role' dialog. It prepopulates the configuration values for you. You only need to set the role name and click 'Create'. Then copy the role ARN (AWS resource name) and paste it in Cloudliner 'Create account' dialog. You can delete the role any time and Cloudliner won't be able to access your AWS account.
 
 
 ## Cloudliner environment
-
 Environment is a Cloudliner entity that represents a set of AWS resources to be created in your AWS account. Some of them are included by default (VPC, subnets, route tables, IAM resources, etc), some of them are optional and it's your call whether Cloudliner creates them or not (EC2 instance, RDS, Redis, etc). When you create or update an environment, Cloudliner takes a few minutes to apply the desired configuration to your AWS account. The waiting time depends on resources you need. Shouldn't take more than 15 minutes though.
 
 ## FAQ
@@ -45,7 +48,9 @@ Your EC2 instance doesn't expose any ports to the Internet. It's a security meas
 
 
 ### How to connect to my database or Redis instance?
-Your RDS/Elasticache/DocumentDB resources live in a private subnet. They cannot be access from the Internet. However, you can access them from the EC2 instance created by Cloudliner. First you need to get into your EC2 instance, [How to connect to EC2](#how-to-connect-to-ec2-instance). Run the following command on EC2 instance to retrieve the command that pulls your services credentials and put them into your environment variables (replace cloudliner with your environment name if differs):
+Your RDS/Elasticache/DocumentDB resources live in a private subnet. They cannot be access from the Internet. However, you can access them from the EC2 instance created by Cloudliner. First you need to get into your EC2 instance, [How to connect to EC2](#how-to-connect-to-ec2-instance).
+Credentials to services created by Cloudliner are stored in AWS SSM Parameter store, you can get them [here](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/?region=us-east-1&tab=Table){:target="_blank"}
+Or, in case you want to pull them directly from your EC2 instance to set as environment variables, run the following command on the instance (replace cloudliner with your environment name if differs):
 ```shell
 chamber env cloudliner
 ```
@@ -77,4 +82,8 @@ You should have an SSL/TLS certificate added to your environment ([How to config
 
 ### Can Cloudliner create DNS records for me?
 Not yet :)
+
+
+### How to configure /health endpoint?
+AWS Load balancer performs [health checks](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html){:target="_blank"} against your EC2 based web server. AWS need to know that your service is alive to send traffic there. Cloudliner exepcts your server, that is running on EC2 instance, to have a /health endpoint that returns status code 200.
 

@@ -1,6 +1,6 @@
 # Cloudliner docs
 
-Cloudliner app: [https://app.cloudliner.co/]{:target="_blank"}
+Cloudliner app: [https://app.cloudliner.co/](https://app.cloudliner.co/){:target="_blank"}
 
 ## Table of Contents
 
